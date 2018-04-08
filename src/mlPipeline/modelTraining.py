@@ -61,7 +61,8 @@ def performGridSearch(dataPath):
     X = X_df.values
     Y_df = df["pbr_res"]
     Y = Y_df.values
-
+    print("performing grid search")
+    print("X shape: {}".format(X.shape))
 
     # feature selection
     features = []
@@ -81,6 +82,7 @@ def performGridSearch(dataPath):
     # TODO when you perform CV with this stuff consider doing memory option stuff
     scoring = ["accuracy", "f1", "precision", "recall"]
     importantMetric = "f1"
+    print("Choosing the best model based on {}".format(importantMetric))
 
 
 
