@@ -70,7 +70,12 @@ def performGridSearch(dataPath):
     # features.append(('select_best', SelectKBest(k=6)))
     # Set a minimum threshold of 0.25
     # features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(C=1, penalty="l1", loss = 'l2', dual=True), 0.25)))
-    features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(C=1, penalty="l1", loss = 'squared_hinge', dual=False), 0.25)))
+    # features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(C=0.5, penalty="l1",
+    # 				loss = 'squared_hinge', dual=False), 0.25)))
+    features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(C=1, penalty="l2",
+    				loss = 'squared_hinge', dual=True))))# default settings
+    selectFromThreholds = ["mean", 0.25, 1e-5]
+    linearSVC_Cs = [1, 0.75, 0.25, 0.1]
     # loss='l2', penalty='l1', dual=False
     # features.append(("lasso_dimReduction", SelectFromModel(LassoCV(), 0.25)))
     feature_union = FeatureUnion(features)
@@ -96,6 +101,8 @@ def performGridSearch(dataPath):
     # estimators.append(models)
     paramGrid_LR = [
         {
+        	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
+        	"feature_union__linSVC_dimReduction__threshold": selectFromThreholds,
             "logistic__penalty": ['l1', 'l2'],
             "logistic__C": [1, 10, 100, 1000]
         }
@@ -118,6 +125,8 @@ def performGridSearch(dataPath):
     # estimators.append(models)
     paramGrid_RF = [
         {
+        	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
+        	"feature_union__linSVC_dimReduction__threshold": selectFromThreholds,
             "RFC__n_estimators": [5, 10, 15, 20],# second most important feature to tune. First
             # is max number of feats.
             "RFC__max_features": ["sqrt", "log2", 0.5],# we have lots of possibly dumb
@@ -146,6 +155,8 @@ def performGridSearch(dataPath):
     # estimators.append(models)
     paramGrid_SVC = [
         {
+        	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
+        	"feature_union__linSVC_dimReduction__threshold": selectFromThreholds,
             "SVC__kernel": ['rbf', 'poly', "sigmoid"],
             "SVC__C": [1, 10, 100, 1000]
         }
@@ -166,6 +177,8 @@ def performGridSearch(dataPath):
     # estimators.append(models)
     paramGrid_GBTC = [
         {
+        	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
+        	"feature_union__linSVC_dimReduction__threshold": [0.25],
             "GBTC__learning_rate": [0.001, 0.01, 0.1],
             "GBTC__n_estimators": [50, 100, 200, 300, 400, 500],
             "GBTC__max_depth": [1, 3, 5, 10, 12]

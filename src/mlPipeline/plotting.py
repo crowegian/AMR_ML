@@ -38,7 +38,7 @@ def plotBestModelComparison(modelDictAll, scoring = ["f1", "recall", "precision"
         fig=plt.figure(figsize=(9, 6), dpi= 300, facecolor='w', edgecolor='k')
         barBorderWidths = [0]*len(ind)
         barBorderWidths[np.argmax(scoreMeans)] = 1
-        plt.bar(x = ind, height = scoreMeans, yerr = scoreStds,
+        plt.bar(left = ind, height = scoreMeans, yerr = scoreStds,
                edgecolor='r', linewidth = barBorderWidths)
         plt.xticks(ind, xLabels, rotation = 0)
         plt.ylim((0,1))
