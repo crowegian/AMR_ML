@@ -75,7 +75,7 @@ def performGridSearch(dataPath):
     features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(C=1, penalty="l2",
     				loss = 'squared_hinge', dual=True))))# default settings
     selectFromThreholds = ["mean", 0.25, 1e-5]
-    linearSVC_Cs = [1, 0.75, 0.25, 0.1]
+    linearSVC_Cs = [100, 10, 1, 0.75, 0.25,]
     # loss='l2', penalty='l1', dual=False
     # features.append(("lasso_dimReduction", SelectFromModel(LassoCV(), 0.25)))
     feature_union = FeatureUnion(features)
@@ -158,7 +158,7 @@ def performGridSearch(dataPath):
         	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
         	"feature_union__linSVC_dimReduction__threshold": selectFromThreholds,
             "SVC__kernel": ['rbf', 'poly', "sigmoid"],
-            "SVC__C": [1, 10, 100, 1000]
+            "SVC__C": [0.5, 1, 10, 100, 1000]
         }
     ]
     modelDict["SVC"] = {"pipe":Pipeline(estimators_SVC),
