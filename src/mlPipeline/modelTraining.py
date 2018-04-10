@@ -69,7 +69,9 @@ def performGridSearch(dataPath):
     # features.append(('pca', PCA(n_components=3)))
     # features.append(('select_best', SelectKBest(k=6)))
     # Set a minimum threshold of 0.25
-    features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(), 0.25)))
+    # features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(C=1, penalty="l1", loss = 'l2', dual=True), 0.25)))
+    features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(C=1, penalty="l1", loss = 'squared_hinge', dual=False), 0.25)))
+    # loss='l2', penalty='l1', dual=False
     # features.append(("lasso_dimReduction", SelectFromModel(LassoCV(), 0.25)))
     feature_union = FeatureUnion(features)
     featureSelectionParamGrid = {} # TODO implement feature selection for feature selection.
@@ -83,6 +85,7 @@ def performGridSearch(dataPath):
     scoring = ["accuracy", "f1", "precision", "recall"]
     importantMetric = "f1"
     print("Choosing the best model based on {}".format(importantMetric))
+    print("Performing {} fold cv".format(cv))
 
 
 
