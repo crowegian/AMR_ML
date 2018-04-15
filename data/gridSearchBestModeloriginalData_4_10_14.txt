@@ -1,0 +1,169 @@
+performing grid search
+X shape: (198, 1776)
+Choosing the best model based on f1
+Performing 10 fold cv
+Training logistic
+For Model logistic:
+	accuracy: 0.737
+	f1: 0.77
+	precision: 0.771
+	recall: 0.784
+Best Model Parameters {'feature_union__linSVC_dimReduction__estimator__C': 10, 'feature_union__linSVC_dimReduction__threshold': 1e-05, 'logistic__C': 1000, 'logistic__penalty': 'l1'}
+****************************************************************************************************
+Training randomForest
+For Model randomForest:
+	accuracy: 0.758
+	f1: 0.789
+	precision: 0.794
+	recall: 0.794
+Best Model Parameters {'RFC__criterion': 'gini', 'RFC__max_depth': None, 'RFC__max_features': 'sqrt', 'RFC__n_estimators': 15, 'feature_union__linSVC_dimReduction__estimator__C': 0.75, 'feature_union__linSVC_dimReduction__threshold': 0.25}
+****************************************************************************************************
+Training SVC
+For Model SVC:
+	accuracy: 0.672
+	f1: 0.771
+	precision: 0.652
+	recall: 0.948
+Best Model Parameters {'SVC__C': 1, 'SVC__kernel': 'sigmoid', 'feature_union__linSVC_dimReduction__estimator__C': 0.25, 'feature_union__linSVC_dimReduction__threshold': 0.25}
+****************************************************************************************************
+Training GBTC
+For Model GBTC:
+	accuracy: 0.737
+	f1: 0.793
+	precision: 0.734
+	recall: 0.871
+Best Model Parameters {'GBTC__learning_rate': 0.001, 'GBTC__max_depth': 10, 'GBTC__n_estimators': 400, 'feature_union__linSVC_dimReduction__estimator__C': 1, 'feature_union__linSVC_dimReduction__threshold': 0.25}
+****************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+feature importance for GBTC
+54 features passed to this model
+41 features given feature importance above 0
+
+Feature mgrB has importance 0.24290241385588374
+
+Feature KP0228_02749 has importance 0.09108171319426436
+
+Feature KP0228_03719 has importance 0.07153765555026143
+
+Feature KP0228_01258 has importance 0.054392829539903376
+
+Feature KP0228_00887 has importance 0.0380250779103739
+
+Feature KP0228_04612 has importance 0.03338470236012237
+
+Feature KP0228_04079 has importance 0.030167902081253944
+
+Feature KP0228_05095 has importance 0.029416519990687028
+
+Feature KP0228_05093 has importance 0.02598497573660674
+
+Feature KP0228_00647 has importance 0.025655851411787806
+
+Feature KP0228_01257 has importance 0.02556730794426264
+
+Feature KP0228_01191 has importance 0.025543400284327365
+
+Feature KP0228_00935 has importance 0.02447935601542663
+
+Feature KP0228_00231 has importance 0.024133664624968545
+
+Feature KP0228_03376 has importance 0.020214061425002976
+
+Feature KP0228_01636 has importance 0.0199064668311333
+
+Feature KP0228_01423 has importance 0.01986747918114718
+
+Feature KP0228_03186 has importance 0.01916754917822582
+
+Feature KP0228_00003 has importance 0.017108110609848
+
+Feature KP0228_01800 has importance 0.015449090239868091
+
+Feature KP0228_00780 has importance 0.015440659964917005
+
+Feature KP0228_02281 has importance 0.013709247584423738
+
+Feature KP0228_04429 has importance 0.013345328725458102
+
+Feature KP0228_01801 has importance 0.013332394272825341
+
+Feature KP0228_02222 has importance 0.012523812923271245
+
+Feature KP0228_02499 has importance 0.011460978987182785
+
+Feature KP0228_01892 has importance 0.010639657741888863
+
+Feature KP0228_01648 has importance 0.00903184406484636
+
+Feature KP0228_00532 has importance 0.008536110695443022
+
+Feature KP0228_01383 has importance 0.00805672095112308
+
+Feature KP0228_00809 has importance 0.007460730792735384
+
+Feature KP0228_00651 has importance 0.006048766113361094
+
+Feature KP0228_03126 has importance 0.004961173703811345
+
+Feature KP0228_03478 has importance 0.004505131676852394
+
+Feature KP0228_03377 has importance 0.002298393589620867
+
+Feature KP0228_03378 has importance 0.002041238081090378
+
+Feature KP0228_01339 has importance 0.0010405445448933913
+
+Feature KP0228_01437 has importance 0.000819407860970892
+
+Feature KP0228_03486 has importance 0.0007467674903042851
+
+Feature KP0228_00004 has importance 1.4620769187173213e-05
+
+Feature KP0228_02065 has importance 3.415004378196568e-07
+
+Feature KP0228_03548 has importance 0.0
+
+Feature KP0228_01345 has importance 0.0
+
+Feature KP0228_01470 has importance 0.0
+
+Feature KP0228_03550 has importance 0.0
+
+Feature KP0228_04130 has importance 0.0
+
+Feature KP0228_04292 has importance 0.0
+
+Feature KP0228_04658 has importance 0.0
+
+Feature KP0228_01808 has importance 0.0
+
+Feature KP0228_01979 has importance 0.0
+
+Feature KP0228_03441 has importance 0.0
+
+Feature KP0228_04686 has importance 0.0
+
+Feature KP0228_03113 has importance 0.0
+
+Feature KP0228_05046 has importance 0.0
