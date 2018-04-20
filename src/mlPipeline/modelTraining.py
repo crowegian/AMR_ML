@@ -63,6 +63,7 @@ def performGridSearch(dataPath):
     Y = Y_df.values
     print("performing grid search")
     print("X shape: {}".format(X.shape))
+    print("Y positive exampes: {}".format(sum(Y)))
 
     # feature selection
     features = []
@@ -84,7 +85,7 @@ def performGridSearch(dataPath):
 
     # Specify the models
     modelDict = {}
-    cv = 10
+    cv = 5
     n_jobs = 3
     # TODO when you perform CV with this stuff consider doing memory option stuff
     scoring = ["accuracy", "f1", "precision", "recall"]
