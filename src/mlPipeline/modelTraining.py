@@ -26,6 +26,14 @@ TODO:
 
 
 
+class gwasFeatureExtractor(object):
+    def transform(self, x):
+        cols = x[:,0:10]
+    def fit(self, x, y = None):
+        return(self)
+
+
+
 def printBestModelStatistics(gridCV, scoring, modelName):
     """
     Description:
@@ -115,18 +123,18 @@ def performGridSearch(dataPath, dataPrefix):
     # 				loss = 'squared_hinge', dual=False), 0.25)))
     features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(C=1, penalty="l2",
     				loss = 'squared_hinge', dual=True))))# default settings
+    features.append(("gwasFeatures", gwasFeatureExtractor()))
     selectFromThreholds = ["mean", 0.25, 1e-5]
     linearSVC_Cs = [100, 10, 1, 0.75, 0.25,]
     # loss='l2', penalty='l1', dual=False
     # features.append(("lasso_dimReduction", SelectFromModel(LassoCV(), 0.25)))
     feature_union = FeatureUnion(features)
-    featureSelectionParamGrid = {} # TODO implement feature selection for feature selection.
 
 
     # Specify the models
     modelDict = {}
     # cv = 5
-    n_jobs = 3
+    n_jobs = 1
     # TODO when you perform CV with this stuff consider doing memory option stuff
     scoring = ["accuracy", "f1", "precision", "recall"]
     importantMetric = "f1"
@@ -245,4 +253,5 @@ def performGridSearch(dataPath, dataPrefix):
         currModelDict["refitMetric"] = importantMetric
         print("Best Model Parameters {}".format(currModelDict["gridcv"].best_params_))
         print("*"*100)
+        break
     return(modelDict)
