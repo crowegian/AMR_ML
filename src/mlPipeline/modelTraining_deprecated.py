@@ -12,7 +12,6 @@ from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall
 # from sklearn.feature_selection import SelectFromModel
 # from sklearn.linear_model import LassoCV
 import numpy as np
-import glob
 
 
 """
@@ -43,7 +42,7 @@ def printBestModelStatistics(gridCV, scoring, modelName):
     print(outStr)  
 
 
-def performGridSearch(dataPath, dataPrefix):
+def performGridSearch(dataPath):
     """
     Description:
     Input:
@@ -56,55 +55,16 @@ def performGridSearch(dataPath, dataPrefix):
     """
 
     # Read in the data
-    nModels = 4
-    relevantFiles = glob.glob(dataPath + dataPrefix + "*.csv")
-    # print(relevantFiles)
-    assert len(relevantFiles) in [2,4], "Unexpected item in bagging area"
-
-    validationData = False
-
-    if len(relevantFiles) == 2:# no testing data provided so use CV
-        cv = 5
-        trainPath = dataPath + dataPrefix + "full.csv"
-        allData = pd.read_csv(trainPath)
-    else: # validation data provided. Should always have GWAS
-        validationData = True
-        trainPath = dataPath + dataPrefix + "train.csv"
-        valPath = dataPath + dataPrefix + "test.csv"
-        gwasPath = dataPath + dataPrefix + "gwas.csv"
-        trainDF = pd.read_csv(trainPath)
-        print(trainDF.shape)
-        valDF = pd.read_csv(valPath)
-        print(valDF.shape)
-        allData = pd.concat([trainDF, valDF])
-        GWASDF = pd.read_csv(gwasPath)
-        nTrain = trainDF.shape[0]
-        nVal = valDF.shape[0]
-        cv = lambda: zip([np.arange(nTrain)], [np.arange(nTrain, nTrain + nVal)])
-    allData = allData.set_index("isolate")
-    X_df = allData.drop(labels = ["pbr_res"], axis = 1)
+    df = pd.read_csv(dataPath)
+    df = df.set_index("isolate")
+    X_df = df.drop(labels = ["pbr_res"], axis = 1)
     X = X_df.values
-    Y_df = allData["pbr_res"]
-    Y = Y_df.values 
-
-
-
-
-
-    # df = pd.read_csv(dataPath)
-    # df = df.set_index("isolate")
-    # X_df = df.drop(labels = ["pbr_res"], axis = 1)
-    # X = X_df.values
-    # Y_df = df["pbr_res"]
-    # Y = Y_df.values
+    Y_df = df["pbr_res"]
+    Y = Y_df.values
     print("performing grid search")
     print("X shape: {}".format(X.shape))
-    print("Y positive examples: {}".format(sum(Y)))
-    if type(cv) is int:
-        print("Using {} fold cv".format(cv))
-    else:
-        print("Training n = {}\nValidation n = {}".format(nTrain, nVal))
-    # 1/0
+    print("Y positive exampes: {}".format(sum(Y)))
+
     # feature selection
     features = []
     # features.append(('pca', PCA(n_components=3)))
@@ -125,13 +85,13 @@ def performGridSearch(dataPath, dataPrefix):
 
     # Specify the models
     modelDict = {}
-    # cv = 5
+    cv = 5
     n_jobs = 3
     # TODO when you perform CV with this stuff consider doing memory option stuff
     scoring = ["accuracy", "f1", "precision", "recall"]
     importantMetric = "f1"
     print("Choosing the best model based on {}".format(importantMetric))
-    # print("Performing {} fold cv".format(cv))
+    print("Performing {} fold cv".format(cv))
 
 
 
@@ -152,8 +112,7 @@ def performGridSearch(dataPath, dataPrefix):
                              "params": paramGrid_LR}
     modelDict["logistic"]["gridcv"] = GridSearchCV(estimator = modelDict["logistic"]["pipe"],
                              param_grid = modelDict["logistic"]["params"],
-                             cv = cv if type(cv) is int else cv(),
-                             n_jobs = n_jobs, return_train_score = False,
+                             cv = cv, n_jobs = n_jobs, return_train_score = False,
                              scoring = scoring, refit = importantMetric)
     # TODO understand how linearSVC works with these parameters
 
@@ -182,8 +141,7 @@ def performGridSearch(dataPath, dataPrefix):
                                  "params": paramGrid_RF}
     modelDict["randomForest"]["gridcv"] = GridSearchCV(estimator = modelDict["randomForest"]["pipe"],
                            param_grid = modelDict["randomForest"]["params"],
-                           cv = cv if type(cv) is int else cv(), 
-                           n_jobs = n_jobs, return_train_score = False,
+                           cv = cv, n_jobs = n_jobs, return_train_score = False,
                            scoring = scoring, refit = importantMetric)
     #TODO is it better to build RF trees to purity and prune?
 
@@ -208,8 +166,7 @@ def performGridSearch(dataPath, dataPrefix):
                         "params": paramGrid_SVC}
     modelDict["SVC"]["gridcv"] = GridSearchCV(estimator = modelDict["SVC"]["pipe"],
                            param_grid = modelDict["SVC"]["params"],
-                           cv = cv if type(cv) is int else cv(), 
-                           n_jobs = n_jobs, return_train_score = False,
+                           cv = cv, n_jobs = n_jobs, return_train_score = False,
                            scoring = scoring, refit = importantMetric)
 
 
@@ -232,11 +189,9 @@ def performGridSearch(dataPath, dataPrefix):
                          "params": paramGrid_GBTC}
     modelDict["GBTC"]["gridcv"] = GridSearchCV(estimator = modelDict["GBTC"]["pipe"],
                            param_grid = modelDict["GBTC"]["params"],
-                           cv = cv if type(cv) is int else cv(), 
-                           n_jobs = n_jobs, return_train_score = False,
+                           cv = cv, n_jobs = n_jobs, return_train_score = False,
                            scoring = scoring, refit = importantMetric)
     # modelDict["gradientBosting"] = Pipeline(estimators_GBTC)
-    # return(modelDict, X, Y)
     for modelName, currModelDict in modelDict.items():
         print("Training {}".format(modelName))
         currModelDict["gridcv"].fit(X,Y)
