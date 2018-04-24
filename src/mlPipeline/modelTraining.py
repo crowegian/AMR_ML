@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.model_selection import cross_val_score, cross_validate
 from sklearn.pipeline import Pipeline
@@ -13,7 +14,8 @@ from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall
 # from sklearn.linear_model import LassoCV
 import numpy as np
 import glob
-
+import warnings
+warnings.filterwarnings("ignore")
 
 """
 Description:
@@ -26,10 +28,33 @@ TODO:
 
 
 
-class gwasFeatureExtractor(object):
+
+
+
+
+
+
+class gwasFeatureExtractor(BaseEstimator, TransformerMixin):
+    def __init__(self, xLocusTags, gwasDF, gwasCutoff = 0.1):
+        # print(gwasDF.shape)
+        self.gwasDF = gwasDF
+        self.gwasCutoff = gwasCutoff
+        self.xLocusTags = xLocusTags
+        self.colsToUse = None
+        # print(self.gwasPath)
+
     def transform(self, x):
-        cols = x[:,0:10]
+        # print(len(self.colsToUse))
+        cols = x[:,self.colsToUse]
+        return(cols)
     def fit(self, x, y = None):
+        if self.gwasDF is not None:
+            corrVector = self.gwasDF.corr_dat.values
+            gwasLocusTags = self.gwasDF.LOCUS_TAG.values
+            candidateLoci = gwasLocusTags[np.where(corrVector >= self.gwasCutoff)]
+            self.colsToUse = [idx for idx, locusTag in enumerate(self.xLocusTags) if locusTag in candidateLoci]
+        else:
+            self.colsToUse = []
         return(self)
 
 
@@ -70,7 +95,8 @@ def performGridSearch(dataPath, dataPrefix):
     assert len(relevantFiles) in [2,4], "Unexpected item in bagging area"
 
     validationData = False
-
+    GWASDF = None
+    gwasCutOffList = [0.0]
     if len(relevantFiles) == 2:# no testing data provided so use CV
         cv = 5
         trainPath = dataPath + dataPrefix + "full.csv"
@@ -80,6 +106,9 @@ def performGridSearch(dataPath, dataPrefix):
         trainPath = dataPath + dataPrefix + "train.csv"
         valPath = dataPath + dataPrefix + "test.csv"
         gwasPath = dataPath + dataPrefix + "gwas.csv"
+        print("Using trainFile: {}\nvalFile: {}\ngwasFile: {}".format(trainPath,
+                                                                      valPath,
+                                                                      gwasPath))
         trainDF = pd.read_csv(trainPath)
         print(trainDF.shape)
         valDF = pd.read_csv(valPath)
@@ -89,12 +118,14 @@ def performGridSearch(dataPath, dataPrefix):
         nTrain = trainDF.shape[0]
         nVal = valDF.shape[0]
         cv = lambda: zip([np.arange(nTrain)], [np.arange(nTrain, nTrain + nVal)])
+        gwasCutOffList = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+        print("maximum gwas corr: {}".format(np.max(GWASDF.corr_dat.values)))
     allData = allData.set_index("isolate")
     X_df = allData.drop(labels = ["pbr_res"], axis = 1)
     X = X_df.values
     Y_df = allData["pbr_res"]
     Y = Y_df.values 
-
+    # return(X_df)
 
 
 
@@ -123,7 +154,8 @@ def performGridSearch(dataPath, dataPrefix):
     # 				loss = 'squared_hinge', dual=False), 0.25)))
     features.append(("linSVC_dimReduction", SelectFromModel(LinearSVC(C=1, penalty="l2",
     				loss = 'squared_hinge', dual=True))))# default settings
-    features.append(("gwasFeatures", gwasFeatureExtractor()))
+    features.append(("gwasFeatures", gwasFeatureExtractor(xLocusTags = list(X_df),
+                                     gwasDF = GWASDF)))
     selectFromThreholds = ["mean", 0.25, 1e-5]
     linearSVC_Cs = [100, 10, 1, 0.75, 0.25,]
     # loss='l2', penalty='l1', dual=False
@@ -134,9 +166,9 @@ def performGridSearch(dataPath, dataPrefix):
     # Specify the models
     modelDict = {}
     # cv = 5
-    n_jobs = 1
+    n_jobs = 2
     # TODO when you perform CV with this stuff consider doing memory option stuff
-    scoring = ["accuracy", "f1", "precision", "recall"]
+    scoring = ["accuracy", "f1", "precision", "recall", "roc_auc"]
     importantMetric = "f1"
     print("Choosing the best model based on {}".format(importantMetric))
     # print("Performing {} fold cv".format(cv))
@@ -150,12 +182,14 @@ def performGridSearch(dataPath, dataPrefix):
     # estimators.append(models)
     paramGrid_LR = [
         {
+            "feature_union__gwasFeatures__gwasCutoff":gwasCutOffList,
         	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
         	"feature_union__linSVC_dimReduction__threshold": selectFromThreholds,
             "logistic__penalty": ['l1', 'l2'],
             "logistic__C": [1, 10, 100, 1000]
         }
     ]
+    # print(paramGrid_LR)
     modelDict["logistic"] = {"pipe": Pipeline(estimators_LR),
                              "params": paramGrid_LR}
     modelDict["logistic"]["gridcv"] = GridSearchCV(estimator = modelDict["logistic"]["pipe"],
@@ -175,6 +209,7 @@ def performGridSearch(dataPath, dataPrefix):
     # estimators.append(models)
     paramGrid_RF = [
         {
+            "feature_union__gwasFeatures__gwasCutoff":gwasCutOffList,
         	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
         	"feature_union__linSVC_dimReduction__threshold": selectFromThreholds,
             "RFC__n_estimators": [5, 10, 15, 20],# second most important feature to tune. First
@@ -206,6 +241,7 @@ def performGridSearch(dataPath, dataPrefix):
     # estimators.append(models)
     paramGrid_SVC = [
         {
+            "feature_union__gwasFeatures__gwasCutoff":gwasCutOffList,
         	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
         	"feature_union__linSVC_dimReduction__threshold": selectFromThreholds,
             "SVC__kernel": ['rbf', 'poly', "sigmoid"],
@@ -229,6 +265,7 @@ def performGridSearch(dataPath, dataPrefix):
     # estimators.append(models)
     paramGrid_GBTC = [
         {
+            "feature_union__gwasFeatures__gwasCutoff":gwasCutOffList,
         	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
         	"feature_union__linSVC_dimReduction__threshold": [0.25],
             "GBTC__learning_rate": [0.001, 0.01, 0.1],
@@ -246,6 +283,8 @@ def performGridSearch(dataPath, dataPrefix):
     # modelDict["gradientBosting"] = Pipeline(estimators_GBTC)
     # return(modelDict, X, Y)
     for modelName, currModelDict in modelDict.items():
+        # if modelName != "SVC":
+        #     continue
         print("Training {}".format(modelName))
         currModelDict["gridcv"].fit(X,Y)
         printBestModelStatistics(gridCV = currModelDict["gridcv"],
@@ -253,5 +292,5 @@ def performGridSearch(dataPath, dataPrefix):
         currModelDict["refitMetric"] = importantMetric
         print("Best Model Parameters {}".format(currModelDict["gridcv"].best_params_))
         print("*"*100)
-        break
+        # break
     return(modelDict)
