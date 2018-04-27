@@ -97,6 +97,7 @@ def performGridSearch(dataPath, dataPrefix):
     validationData = False
     GWASDF = None
     gwasCutOffList = [0.0]
+    selectFromThreholds = ["mean", 0.25, 1e-5]
     if len(relevantFiles) == 2:# no testing data provided so use CV
         cv = 5
         trainPath = dataPath + dataPrefix + "full.csv"
@@ -118,13 +119,17 @@ def performGridSearch(dataPath, dataPrefix):
         nTrain = trainDF.shape[0]
         nVal = valDF.shape[0]
         cv = lambda: zip([np.arange(nTrain)], [np.arange(nTrain, nTrain + nVal)])
-        gwasCutOffList = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+        gwasCutOffList = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
+        gwasCutOffList = gwasCutOffList[gwasCutOffList <=
+                                        np.max(GWASDF.corr_dat.values)]
+        selectFromThreholds = ["mean", 0.25, 1e-5, np.inf]
         print("maximum gwas corr: {}".format(np.max(GWASDF.corr_dat.values)))
     allData = allData.set_index("isolate")
     X_df = allData.drop(labels = ["pbr_res"], axis = 1)
     X = X_df.values
     Y_df = allData["pbr_res"]
     Y = Y_df.values 
+    # print(gwasCutOffList)
     # return(X_df)
 
 
@@ -156,7 +161,6 @@ def performGridSearch(dataPath, dataPrefix):
     				loss = 'squared_hinge', dual=True))))# default settings
     features.append(("gwasFeatures", gwasFeatureExtractor(xLocusTags = list(X_df),
                                      gwasDF = GWASDF)))
-    selectFromThreholds = ["mean", 0.25, 1e-5]
     linearSVC_Cs = [100, 10, 1, 0.75, 0.25,]
     # loss='l2', penalty='l1', dual=False
     # features.append(("lasso_dimReduction", SelectFromModel(LassoCV(), 0.25)))
@@ -169,7 +173,7 @@ def performGridSearch(dataPath, dataPrefix):
     n_jobs = 2
     # TODO when you perform CV with this stuff consider doing memory option stuff
     scoring = ["accuracy", "f1", "precision", "recall", "roc_auc"]
-    importantMetric = "f1"
+    importantMetric = "roc_auc"
     print("Choosing the best model based on {}".format(importantMetric))
     # print("Performing {} fold cv".format(cv))
 
@@ -282,6 +286,7 @@ def performGridSearch(dataPath, dataPrefix):
                            scoring = scoring, refit = importantMetric)
     # modelDict["gradientBosting"] = Pipeline(estimators_GBTC)
     # return(modelDict, X, Y)
+    print("Gwas Cutoff {}".format(gwasCutOffList))
     for modelName, currModelDict in modelDict.items():
         # if modelName != "SVC":
         #     continue
