@@ -116,6 +116,7 @@ def performGridSearch(dataPath, dataPrefix):
         print(valDF.shape)
         allData = pd.concat([trainDF, valDF])
         GWASDF = pd.read_csv(gwasPath)
+        GWASDF.corr_dat = np.abs(GWASDF.corr_dat)
         nTrain = trainDF.shape[0]
         nVal = valDF.shape[0]
         cv = lambda: zip([np.arange(nTrain)], [np.arange(nTrain, nTrain + nVal)])
@@ -123,7 +124,15 @@ def performGridSearch(dataPath, dataPrefix):
         gwasCutOffList = gwasCutOffList[gwasCutOffList <=
                                         np.max(GWASDF.corr_dat.values)]
         selectFromThreholds = ["mean", 0.25, 1e-5, np.inf]
-        print("maximum gwas corr: {}".format(np.max(GWASDF.corr_dat.values)))
+        secondMax = np.sort(GWASDF.corr_dat.values)[::-1][1]
+        min = np.min(GWASDF.corr_dat.values)
+        gwasCutOffList = np.arange(start = 0.0, step = 0.05, stop = secondMax)
+        # print(gwasCutOffList)
+        # print("maximum gwas corr: {}".format(np.sort(GWASDF.corr_dat.values)[::-1][1]))
+        print("GWAS summary stats")
+        print(GWASDF.corr_dat.agg(["mean", "max", "min"]))
+        # return(GWASDF)
+    # return(0)
     allData = allData.set_index("isolate")
     X_df = allData.drop(labels = ["pbr_res"], axis = 1)
     X = X_df.values
