@@ -63,9 +63,11 @@ def plotBestModelComparison(modelDictAll, scoring = ["f1", "recall", "precision"
 def findBestModel(modelList, resultKey, removeZeroF1Score):
     bestModelName = ""
     bestPerformance = 0# this assumes we want to maximize performance
+    bestF1Performance = 0
     f1Key = "mean_test_f1"
     modelStd = -1
     stdKey = resultKey.replace("mean_test_", "std_test_")
+    f1StdKey = f1Key.replace("mean_test_", "std_test_")
     for modelName, cvDict in modelList.items():
     #     print(modelName)
         currModelIndex = cvDict["gridcv"].best_index_
@@ -80,7 +82,9 @@ def findBestModel(modelList, resultKey, removeZeroF1Score):
             bestModelName = modelName
             bestPerformance = currModelPerformance
             modelStd = cvDict["gridcv"].cv_results_[stdKey][currModelIndex]
-    return(bestModelName, bestPerformance, modelStd)
+            bestF1Performance = cvDict["gridcv"].cv_results_[f1Key][currModelIndex]
+            f1Std = cvDict["gridcv"].cv_results_[f1StdKey][currModelIndex]
+    return(bestModelName, bestPerformance, modelStd, bestF1Performance, f1Std)
 
 
 
@@ -114,10 +118,12 @@ def plotDatasetModelComparison(allDataModelDict, dataSetComparisonList,
     stdidx = 2
     if removeZeroScores:
         print("Dataset with all zero f1 scores are being removed from plots")
-        dataSetList = [dset for dset in list(datasetBestModelDict.keys())
+        dataSetList = [dset for dset in dataSetComparisonList
                        if datasetBestModelDict[dset][modelIdx] != ""]
 
     # dataSetList.sort()
+    # print(dataSetComparisonList)
+    # print(dataSetList)
     perfList = [datasetBestModelDict[dset][perfIdx] for dset in dataSetList]
     stdList = [datasetBestModelDict[dset][stdidx] for dset in dataSetList]
     modelList = [datasetBestModelDict[dset][modelIdx] for dset in dataSetList]
@@ -129,6 +135,8 @@ def plotDatasetModelComparison(allDataModelDict, dataSetComparisonList,
     ind = np.arange(len(modelList))
     if len(dataSetComparisonList) > 8:
         figSize = (12,6)
+    elif len(dataSetComparisonList) >= 4:
+        figSize = np.array([9,6])*1.0
     else:
         figSize = np.array([9,6])*0.75
     fig=plt.figure(figsize=figSize, dpi= 300, facecolor='w', edgecolor='k')
@@ -140,5 +148,5 @@ def plotDatasetModelComparison(allDataModelDict, dataSetComparisonList,
     xLbls = [lbl + "\n" + mdlName for mdlName, lbl in zip(modelList, xLbls)]
     plt.xticks(ind, xLbls, rotation = 45, ha = "center")
     plt.ylim((0,1))
-    title = plt.title("Dataset Performance Comparison")
+    title = plt.title("Dataset Performance Comparison {}".format(compMetric.replace("_", " ")))
     return(datasetBestModelDict)
