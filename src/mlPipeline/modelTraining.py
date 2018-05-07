@@ -36,7 +36,18 @@ TODO:
 
 class gwasFeatureExtractor(BaseEstimator, TransformerMixin):
     def __init__(self, xLocusTags, gwasDF, gwasCutoff = 0.1):
-        # print(gwasDF.shape)
+        """
+        Description: Performs GWAS feature selection which can be used in a sklearn pipeline.
+        Input:
+            xLocusTags (str): The names of locus tags in the feature columns. Thus each column in
+                the X data should correspond to a correlation score and name in gwasDF
+            gwasDF (pandas DF): A dataframe of xLocusTags and correlation score.
+            gwasCutoff (float): The minimum absolute correlation score needed to be considered as
+                a feature for models.
+        Output:
+            None: Results are printed.
+        TODO:
+        """
         self.gwasDF = gwasDF
         self.gwasCutoff = gwasCutoff
         self.xLocusTags = xLocusTags
@@ -61,9 +72,13 @@ class gwasFeatureExtractor(BaseEstimator, TransformerMixin):
 
 def printBestModelStatistics(gridCV, scoring, modelName):
     """
-    Description:
+    Description: Prints information about the model specified in modelName.
     Input:
+        gridCV (dict): A dictionary returned by sklearn's GridSearchCV function.
+        scoring (list): A list of metrics in gridCV which are to be printed
+        modelName (str): Name of model to be printed.
     Output:
+        None: Results are printed.
     TODO:
     """
     scoringDict = {}
@@ -78,14 +93,20 @@ def printBestModelStatistics(gridCV, scoring, modelName):
 
 def performGridSearch(dataPath, dataPrefix):
     """
-    Description:
+    Description: Perfroms gridsearch over 4 sklearn models. Hyperparameters tuned include 
+        model parameters as well as feature selection parameters. Feature selection is performed
+        using GWAS correlation scores (if available) and linear SVC to rank feature importance
+        and taking the top n features where n is a tunable parameter.
     Input:
+        dataPath (str): Path to dataset folder.
+        dataPrefix (str) prefix for the dataset in question. All relevant files for this datset
+            share the same prefix.
     Output:
+        modelDict (dict(dict(str))): A dictionary of grid search information for all models. The 
+        inner keys are string names for the models, and the values correspond to dictionaries of
+        grid search runs.
     TODO:
-        1) Figure out some better feature selection. Why use certain values and methods
-        2) Implemetn grid search over feature selection methods
-        3) Understands linearSVC parameters.
-        4) Add option for saving model dictionary
+        1) 
     """
 
     # Read in the data
