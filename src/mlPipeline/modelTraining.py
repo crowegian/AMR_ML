@@ -113,7 +113,9 @@ def performGridSearch(dataPath, dataPrefix):
     nModels = 4
     relevantFiles = glob.glob(dataPath + dataPrefix + "*.csv")
     # print(relevantFiles)
-    assert len(relevantFiles) in [2,4], "Unexpected item in bagging area"
+    assertStr = "Unexpected item in bagging area. Have you unzipped the data file?" +
+        "Please refer to the README for information on running the ML notebook"
+    assert len(relevantFiles) in [2,4], assertStr
 
     validationData = False
     GWASDF = None
