@@ -16,4 +16,4 @@ All cope is implemented in python and R, and requies the use of jupternotebooks.
 
 # Running the pipeline
 1. Feature engineering can be exectuted by running the R script `AMR_ML/src/featureEngineering/feature_engineering/pbr_ml_jt_analysis_project.R` please be sure to set the working directory in that script to where the data needed for the script can be found. You should simply have to change the beginning of the setwd() call as the rest of the path operates within the AMR_ML repo.
-2. Machine learning can eb exectuted by stepping through the cells in the `ML_notebook.ipynb` notebook. To run execute `jupyter notebook` from the command line within the head directory of AMR_ML so that paths work.
+2. Machine learning can be exectuted by stepping through the cells in the `ML_notebook.ipynb` notebook. To run execute `jupyter notebook` from the command line within the head directory of AMR_ML so that paths work. before running the cells please unzip the data found in the zip file `AMR_ML/data_MLData/pbr_ml_project_datasets_20180423.zip`
