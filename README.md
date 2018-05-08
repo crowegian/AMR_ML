@@ -12,3 +12,8 @@ There are two main components to the pipeline for predicting antimicrobial resit
 
 # Libraries and Modules needed to run the project
 All cope is implemented in python and R, and requies the use of jupternotebooks. The machine learning pipeline requires numpy, pandas, and sk-learn in order to run correctly. The feature engineering pipeline requires the libraries tidyverse, reshape2, devtools, treeWAS, and caret. Installation for treeWAS is a bit special but code ahs been provided to download and install the git repository. Please see the README.md file in  `src/featureEngineering` for a detailed explanation of the files for that part of the pipeline.
+
+
+# Running the pipeline
+1. Feature engineering can be exectuted by running the R script `AMR_ML/src/featureEngineering/feature_engineering/pbr_ml_jt_analysis_project.R` please be sure to set the working directory in that script to where the data needed for the script can be found. You should simply have to change the beginning of the setwd() call as the rest of the path operates within the AMR_ML repo.
+2. Machine learning can eb exectuted by stepping through the cells in the `ML_notebook.ipynb` notebook. To run execute `jupyter notebook` from the command line within the head directory of AMR_ML so that paths work.
