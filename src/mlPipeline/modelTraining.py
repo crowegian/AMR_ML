@@ -10,6 +10,7 @@ from sklearn.feature_selection import SelectKBest, SelectFromModel
 from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
+# from sklearn.metrics import balanced_accuracy_score
 # from sklearn.feature_selection import SelectFromModel
 # from sklearn.linear_model import LassoCV
 import numpy as np
@@ -218,7 +219,7 @@ def performGridSearch(dataPath, dataPrefix):
     # cv = 5
     n_jobs = 2
     # TODO when you perform CV with this stuff consider doing memory option stuff
-    scoring = ["accuracy", "f1", "precision", "recall", "roc_auc"]
+    scoring = ["accuracy", "f1", "precision", "recall", "roc_auc", "balanced_accuracy"]
     importantMetric = "roc_auc"
     print("Choosing the best model based on {}".format(importantMetric))
     # print("Performing {} fold cv".format(cv))
