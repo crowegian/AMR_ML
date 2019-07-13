@@ -15,6 +15,7 @@ from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall
 import numpy as np
 import glob
 import warnings
+import sys
 warnings.filterwarnings("ignore")
 
 """
@@ -52,6 +53,7 @@ class gwasFeatureExtractor(BaseEstimator, TransformerMixin):
         self.gwasCutoff = gwasCutoff
         self.xLocusTags = xLocusTags
         self.colsToUse = None
+        # print("hey")
         # print(self.gwasPath)
 
     def transform(self, x):
@@ -60,9 +62,22 @@ class gwasFeatureExtractor(BaseEstimator, TransformerMixin):
         return(cols)
     def fit(self, x, y = None):
         if self.gwasDF is not None:
-            corrVector = self.gwasDF.corr_dat.values
-            gwasLocusTags = self.gwasDF.LOCUS_TAG.values
-            candidateLoci = gwasLocusTags[np.where(corrVector >= self.gwasCutoff)]
+            if "corr_dat" in self.gwasDF.columns:
+                # print("Using correlation as part of feature selection")
+                # This is kept in when we're using correlation and want to use 
+                # those features highly correlated with the outcome.
+                corrVector = self.gwasDF.corr_dat.values
+                gwasLocusTags = self.gwasDF.LOCUS_TAG.values
+                candidateLoci = gwasLocusTags[np.where(corrVector >= self.gwasCutoff)]
+            elif "p.vals" in self.gwasDF.columns:
+                # print("Using pvalues as part of feature selection")
+                # WHen using pvalues we look for pvalues less than the cutoff
+                pvalVector = self.gwasDF['p.values'].values
+                gwasLocusTags = self.gwasDF.LOCUS_TAG.values
+                candidateLoci = gwasLocusTags[np.where(pvalVector <= self.gwasCutoff)]
+            else:
+                print("Unexpected gwas csv structure.", sys.exc_info()[0])
+                raise
             self.colsToUse = [idx for idx, locusTag in enumerate(self.xLocusTags) if locusTag in candidateLoci]
         else:
             self.colsToUse = []
