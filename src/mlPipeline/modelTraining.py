@@ -17,6 +17,7 @@ import numpy as np
 import glob
 import warnings
 import sys
+import csv
 warnings.filterwarnings("ignore")
 
 """
@@ -135,11 +136,34 @@ def performGridSearch(dataPath, dataPrefix):
     validationData = False
     GWASDF = None
     gwasCutOffList = [0.0]
-    selectFromThreholds = ["mean", 0.25, 1e-5]
+    selectFromThreholds = ["mean*0.25", "mean", "mean*1.25"]
+    # selectFromThreholds = ["mean", 0.25, 1e-5]
     if len(relevantFiles) == 2:# no testing data provided so use CV
-        cv = 5
+        cv = 2
         trainPath = dataPath + dataPrefix + "full.csv"
-        allData = pd.read_csv(trainPath)
+        print("reading in data")
+        isolateList = []
+        with open(trainPath) as fp:
+            csvReader = csv.reader(fp)
+            header = next(csvReader)
+        if len(header) > 200000:
+            with open(trainPath) as fp:
+                csvReader = csv.reader(fp)
+                header = next(csvReader)
+                for line in csvReader:
+                    isolateList.append(line[0])
+            print("isolates:", isolateList[0:10])
+            allData = np.loadtxt(trainPath, delimiter = ",", skiprows = 1, usecols = range(1, len(header))) 
+            allData = pd.DataFrame(allData, columns = header[1:])
+            allData.insert(loc = 0, column = "isolate", value = isolateList) 
+                # print(time.time() - start) 
+                # allData = pd.read_csv(trainPath, dtype = myDtypes)
+                # allData = np.loadtxt(trainPath, delimiter = ",", skiprows = 1,
+                #     usecols = range(1, len(header))) 
+        else:
+            allData = pd.read_csv(trainPath)
+        print("data read")
+
     else: # validation data provided. Should always have GWAS
         validationData = True
         trainPath = dataPath + dataPrefix + "train.csv"
@@ -161,7 +185,7 @@ def performGridSearch(dataPath, dataPrefix):
         gwasCutOffList = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
         gwasCutOffList = gwasCutOffList[gwasCutOffList <=
                                         np.max(GWASDF.corr_dat.values)]
-        selectFromThreholds = ["mean", 0.25, 1e-5, np.inf]
+        selectFromThreholds = ["mean*0.25", "mean", "mean*1.25", np.inf]
         secondMax = np.sort(GWASDF.corr_dat.values)[::-1][1]
         min = np.min(GWASDF.corr_dat.values)
         gwasCutOffList = np.arange(start = 0.0, step = 0.05, stop = secondMax)
@@ -171,11 +195,14 @@ def performGridSearch(dataPath, dataPrefix):
         print(GWASDF.corr_dat.agg(["mean", "max", "min"]))
         # return(GWASDF)
     # return(0)
+    print("data read")
+    print("splitting data")
     allData = allData.set_index("isolate")
     X_df = allData.drop(labels = ["pbr_res"], axis = 1)
     X = X_df.values
     Y_df = allData["pbr_res"]
     Y = Y_df.values 
+    print("data split")
     # print(gwasCutOffList)
     # return(X_df)
 
@@ -217,7 +244,7 @@ def performGridSearch(dataPath, dataPrefix):
     # Specify the models
     modelDict = {}
     # cv = 5
-    n_jobs = 2
+    n_jobs = 10
     # TODO when you perform CV with this stuff consider doing memory option stuff
     scoring = ["accuracy", "f1", "precision", "recall", "roc_auc", "balanced_accuracy"]
     importantMetric = "roc_auc"
@@ -247,7 +274,9 @@ def performGridSearch(dataPath, dataPrefix):
                              param_grid = modelDict["logistic"]["params"],
                              cv = cv if type(cv) is int else cv(),
                              n_jobs = n_jobs, return_train_score = False,
-                             scoring = scoring, refit = importantMetric)
+                             scoring = scoring, refit = importantMetric,
+                             error_score = np.NaN)
+    # error_score = -1 means a score of np.NaN is returned when fit doesn't work
     # TODO understand how linearSVC works with these parameters
 
 
@@ -278,7 +307,8 @@ def performGridSearch(dataPath, dataPrefix):
                            param_grid = modelDict["randomForest"]["params"],
                            cv = cv if type(cv) is int else cv(), 
                            n_jobs = n_jobs, return_train_score = False,
-                           scoring = scoring, refit = importantMetric)
+                           scoring = scoring, refit = importantMetric,
+                             error_score = np.NaN)
     #TODO is it better to build RF trees to purity and prune?
 
 
@@ -305,7 +335,8 @@ def performGridSearch(dataPath, dataPrefix):
                            param_grid = modelDict["SVC"]["params"],
                            cv = cv if type(cv) is int else cv(), 
                            n_jobs = n_jobs, return_train_score = False,
-                           scoring = scoring, refit = importantMetric)
+                           scoring = scoring, refit = importantMetric,
+                             error_score = np.NaN)
 
 
 
@@ -330,12 +361,14 @@ def performGridSearch(dataPath, dataPrefix):
                            param_grid = modelDict["GBTC"]["params"],
                            cv = cv if type(cv) is int else cv(), 
                            n_jobs = n_jobs, return_train_score = False,
-                           scoring = scoring, refit = importantMetric)
+                           scoring = scoring, refit = importantMetric,
+                             error_score = np.NaN,
+                             verbose = 2)
     # modelDict["gradientBosting"] = Pipeline(estimators_GBTC)
     # return(modelDict, X, Y)
     print("Gwas Cutoff {}".format(gwasCutOffList))
     for modelName, currModelDict in modelDict.items():
-        # if modelName != "SVC":
+        # if modelName != "GBTC":
         #     continue
         print("Training {}".format(modelName))
         currModelDict["gridcv"].fit(X,Y)
