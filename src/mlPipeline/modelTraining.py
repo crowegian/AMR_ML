@@ -63,6 +63,14 @@ class gwasFeatureExtractor(BaseEstimator, TransformerMixin):
         cols = x[:,self.colsToUse]
         return(cols)
     def fit(self, x, y = None):
+        """
+        This will have different behavior for pvalues and correlation scores. 
+        Correlation: the gwasCutOff value is expected to be a minimum correlation score allowed
+            for a feature to be included. Any features with correlation below this will not be
+            considered
+        Pvalues: The gwasCutOff value is expected to be a maximum pvalue allowed for a feature to
+            be included. Any features with pvalues above this will not be considered.
+        """
         if self.gwasDF is not None:
             if "corr_dat" in self.gwasDF.columns:
                 # print("Using correlation as part of feature selection")
@@ -71,10 +79,10 @@ class gwasFeatureExtractor(BaseEstimator, TransformerMixin):
                 corrVector = self.gwasDF.corr_dat.values
                 gwasLocusTags = self.gwasDF.LOCUS_TAG.values
                 candidateLoci = gwasLocusTags[np.where(corrVector >= self.gwasCutoff)]
-            elif "p.vals" in self.gwasDF.columns:
+            elif "p_vals" in self.gwasDF.columns:
                 # print("Using pvalues as part of feature selection")
                 # WHen using pvalues we look for pvalues less than the cutoff
-                pvalVector = self.gwasDF['p.values'].values
+                pvalVector = self.gwasDF['p_vals'].values
                 gwasLocusTags = self.gwasDF.LOCUS_TAG.values
                 candidateLoci = gwasLocusTags[np.where(pvalVector <= self.gwasCutoff)]
             else:
@@ -125,7 +133,7 @@ def performGridSearch(dataPath, dataPrefix):
     TODO:
         1) 
     """
-
+    # testing = False# if testing reduce the number of models to run
     # Read in the data
     nModels = 4
     relevantFiles = glob.glob(dataPath + dataPrefix + "*.csv")
@@ -139,20 +147,22 @@ def performGridSearch(dataPath, dataPrefix):
     selectFromThreholds = ["mean*0.25", "mean", "mean*1.25"]
     # selectFromThreholds = ["mean", 0.25, 1e-5]
     if len(relevantFiles) == 2:# no testing data provided so use CV
-        cv = 2
+        cv = 5
         trainPath = dataPath + dataPrefix + "full.csv"
         print("reading in data")
         isolateList = []
         with open(trainPath) as fp:
             csvReader = csv.reader(fp)
             header = next(csvReader)
-        if len(header) > 200000:
+        # print(len(header))
+        if len(header) > 100000:
+            print("Reading large data with more efficient code")
             with open(trainPath) as fp:
                 csvReader = csv.reader(fp)
                 header = next(csvReader)
                 for line in csvReader:
                     isolateList.append(line[0])
-            print("isolates:", isolateList[0:10])
+            # print("isolates:", isolateList[0:10])
             allData = np.loadtxt(trainPath, delimiter = ",", skiprows = 1, usecols = range(1, len(header))) 
             allData = pd.DataFrame(allData, columns = header[1:])
             allData.insert(loc = 0, column = "isolate", value = isolateList) 
@@ -162,7 +172,7 @@ def performGridSearch(dataPath, dataPrefix):
                 #     usecols = range(1, len(header))) 
         else:
             allData = pd.read_csv(trainPath)
-        print("data read")
+        # print("data read")
 
     else: # validation data provided. Should always have GWAS
         validationData = True
@@ -178,43 +188,43 @@ def performGridSearch(dataPath, dataPrefix):
         print(valDF.shape)
         allData = pd.concat([trainDF, valDF])
         GWASDF = pd.read_csv(gwasPath)
-        GWASDF.corr_dat = np.abs(GWASDF.corr_dat)
+        # GWASDF.corr_dat = np.abs(GWASDF.corr_dat)
         nTrain = trainDF.shape[0]
         nVal = valDF.shape[0]
         cv = lambda: zip([np.arange(nTrain)], [np.arange(nTrain, nTrain + nVal)])
-        gwasCutOffList = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
-        gwasCutOffList = gwasCutOffList[gwasCutOffList <=
-                                        np.max(GWASDF.corr_dat.values)]
+        # gwasCutOffList = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
+        # gwasCutOffList = gwasCutOffList[gwasCutOffList <=
+                                        # np.max(GWASDF.corr_dat.values)]
         selectFromThreholds = ["mean*0.25", "mean", "mean*1.25", np.inf]
-        secondMax = np.sort(GWASDF.corr_dat.values)[::-1][1]
-        min = np.min(GWASDF.corr_dat.values)
-        gwasCutOffList = np.arange(start = 0.0, step = 0.05, stop = secondMax)
-        # print(gwasCutOffList)
-        # print("maximum gwas corr: {}".format(np.sort(GWASDF.corr_dat.values)[::-1][1]))
-        print("GWAS summary stats")
-        print(GWASDF.corr_dat.agg(["mean", "max", "min"]))
-        # return(GWASDF)
-    # return(0)
-    print("data read")
-    print("splitting data")
+        if "corr_dat" in GWASDF.columns:
+            # Take the absolute value of scores, and create a cutoff list where we consider
+            # all features with correlation above each score.
+            GWASDF.corr_dat = np.abs(GWASDF.corr_dat)
+            secondMax = np.sort(GWASDF.corr_dat.values)[::-1][1]
+            gwasCutOffList = np.arange(start = 0.0, step = 0.05, stop = secondMax)
+            print("GWAS summary stats")
+            print(GWASDF.corr_dat.agg(["mean", "max", "min"]))
+        elif "p_vals" in GWASDF.columns:
+            if GWASDF.shape[0] > 20:
+                # Select 10th smallest pvalue
+                minPvalAccepted = np.sort(GWASDF.p_vals.values)[10]
+            else:
+                # Select the second smallest pvalues
+                minPvalAccepted = np.sort(GWASDF.p_vals.values)[5]
+            maxPValAccepted = np.percentile(GWASDF.p_vals.values, 75)
+            gwasCutOffList = np.arange(start = minPvalAccepted, step = 0.01, stop = maxPValAccepted)
+            print("GWAS summary stats")
+            print(GWASDF.p_vals.agg(["mean", "max", "min"]))
+        else:
+            print("Unexpected gwas csv structure. Are corr_dat or p_vals present?",
+                sys.exc_info()[0])
+            raise
+
     allData = allData.set_index("isolate")
     X_df = allData.drop(labels = ["pbr_res"], axis = 1)
     X = X_df.values
     Y_df = allData["pbr_res"]
     Y = Y_df.values 
-    print("data split")
-    # print(gwasCutOffList)
-    # return(X_df)
-
-
-
-
-    # df = pd.read_csv(dataPath)
-    # df = df.set_index("isolate")
-    # X_df = df.drop(labels = ["pbr_res"], axis = 1)
-    # X = X_df.values
-    # Y_df = df["pbr_res"]
-    # Y = Y_df.values
     print("performing grid search")
     print("X shape: {}".format(X.shape))
     print("Y positive examples: {}".format(sum(Y)))
@@ -222,8 +232,7 @@ def performGridSearch(dataPath, dataPrefix):
         print("Using {} fold cv".format(cv))
     else:
         print("Training n = {}\nValidation n = {}".format(nTrain, nVal))
-    # 1/0
-    # feature selection
+
     features = []
     # features.append(('pca', PCA(n_components=3)))
     # features.append(('select_best', SelectKBest(k=6)))
@@ -236,20 +245,17 @@ def performGridSearch(dataPath, dataPrefix):
     features.append(("gwasFeatures", gwasFeatureExtractor(xLocusTags = list(X_df),
                                      gwasDF = GWASDF)))
     linearSVC_Cs = [100, 10, 1, 0.75, 0.25,]
-    # loss='l2', penalty='l1', dual=False
-    # features.append(("lasso_dimReduction", SelectFromModel(LassoCV(), 0.25)))
     feature_union = FeatureUnion(features)
 
 
     # Specify the models
     modelDict = {}
-    # cv = 5
-    n_jobs = 10
+    n_jobs = 5
+    myVerbose = 1
     # TODO when you perform CV with this stuff consider doing memory option stuff
     scoring = ["accuracy", "f1", "precision", "recall", "roc_auc", "balanced_accuracy"]
     importantMetric = "roc_auc"
     print("Choosing the best model based on {}".format(importantMetric))
-    # print("Performing {} fold cv".format(cv))
 
 
 
@@ -257,7 +263,6 @@ def performGridSearch(dataPath, dataPrefix):
     estimators_LR = []
     estimators_LR.append(('feature_union', feature_union))
     estimators_LR.append(('logistic', LogisticRegression()))
-    # estimators.append(models)
     paramGrid_LR = [
         {
             "feature_union__gwasFeatures__gwasCutoff":gwasCutOffList,
@@ -275,8 +280,9 @@ def performGridSearch(dataPath, dataPrefix):
                              cv = cv if type(cv) is int else cv(),
                              n_jobs = n_jobs, return_train_score = False,
                              scoring = scoring, refit = importantMetric,
-                             error_score = np.NaN)
-    # error_score = -1 means a score of np.NaN is returned when fit doesn't work
+                             error_score = np.NaN,
+                             verbose = myVerbose)
+    # error_score = np.NaN means a score of np.NaN is returned when fit doesn't work
     # TODO understand how linearSVC works with these parameters
 
 
@@ -308,7 +314,8 @@ def performGridSearch(dataPath, dataPrefix):
                            cv = cv if type(cv) is int else cv(), 
                            n_jobs = n_jobs, return_train_score = False,
                            scoring = scoring, refit = importantMetric,
-                             error_score = np.NaN)
+                             error_score = np.NaN,
+                             verbose = myVerbose)
     #TODO is it better to build RF trees to purity and prune?
 
 
@@ -336,7 +343,8 @@ def performGridSearch(dataPath, dataPrefix):
                            cv = cv if type(cv) is int else cv(), 
                            n_jobs = n_jobs, return_train_score = False,
                            scoring = scoring, refit = importantMetric,
-                             error_score = np.NaN)
+                             error_score = np.NaN,
+                             verbose = myVerbose)
 
 
 
@@ -349,7 +357,7 @@ def performGridSearch(dataPath, dataPrefix):
         {
             "feature_union__gwasFeatures__gwasCutoff":gwasCutOffList,
         	"feature_union__linSVC_dimReduction__estimator__C":linearSVC_Cs,
-        	"feature_union__linSVC_dimReduction__threshold": [0.25],
+        	"feature_union__linSVC_dimReduction__threshold": selectFromThreholds,
             "GBTC__learning_rate": [0.001, 0.01, 0.1],
             "GBTC__n_estimators": [50, 100, 200, 300, 400, 500],
             "GBTC__max_depth": [1, 3, 5, 10, 12]
@@ -363,13 +371,31 @@ def performGridSearch(dataPath, dataPrefix):
                            n_jobs = n_jobs, return_train_score = False,
                            scoring = scoring, refit = importantMetric,
                              error_score = np.NaN,
-                             verbose = 2)
-    # modelDict["gradientBosting"] = Pipeline(estimators_GBTC)
-    # return(modelDict, X, Y)
-    print("Gwas Cutoff {}".format(gwasCutOffList))
+                             verbose = myVerbose)
+
+
+
+    # In order to test the code reduce the number of models iterated over
+    testing = False
+    if testing:
+        print("testing and reducing the number of models to search")
+        for model, modelGridDict in modelDict.items():
+
+            for key, elem in modelGridDict["params"][0].items():
+                if type(elem) == list or type(elem) == np.ndarray:
+                    modelGridDict["params"][0][key] = elem[0:2]
+
+            modelDict[model]["params"][0] = modelGridDict["params"][0]
+
+            modelDict[model]["gridcv"] = GridSearchCV(estimator = modelDict[model]["pipe"],
+                                   param_grid = modelDict[model]["params"],
+                                   cv = cv if type(cv) is int else cv(), 
+                                   n_jobs = n_jobs, return_train_score = False,
+                                   scoring = scoring, refit = importantMetric,
+                                     error_score = np.NaN,
+                                     verbose = myVerbose)
     for modelName, currModelDict in modelDict.items():
-        # if modelName != "GBTC":
-        #     continue
+
         print("Training {}".format(modelName))
         currModelDict["gridcv"].fit(X,Y)
         printBestModelStatistics(gridCV = currModelDict["gridcv"],
@@ -377,5 +403,4 @@ def performGridSearch(dataPath, dataPrefix):
         currModelDict["refitMetric"] = importantMetric
         print("Best Model Parameters {}".format(currModelDict["gridcv"].best_params_))
         print("*"*100)
-        # break
     return(modelDict)
