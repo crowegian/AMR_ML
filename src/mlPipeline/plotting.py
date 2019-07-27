@@ -191,6 +191,7 @@ def plotDatasetModelComparison(allDataModelDict, dataSetComparisonList,
     # print(dataSetComparisonList)
     # print(dataSetList)
     perfList = [datasetBestModelDict[dset][perfIdx] for dset in dataSetList]
+    # print(perfList)
     stdList = [datasetBestModelDict[dset][stdidx] for dset in dataSetList]
     modelList = [datasetBestModelDict[dset][modelIdx] for dset in dataSetList]
     modelNameMapper = {"GBTC": "GBTC",
@@ -208,7 +209,8 @@ def plotDatasetModelComparison(allDataModelDict, dataSetComparisonList,
     fig=plt.figure(figsize=figSize, dpi= 300, facecolor='w', edgecolor='k')
     barBorderWidths = np.array([0]*len(ind))
     barBorderWidths[np.where(np.array(stdList) == 0)] = 1.5
-    plt.bar(left = ind, height = perfList, yerr = stdList,
+    x = np.arange(0, len(modelList))
+    plt.bar(x = x, height = perfList, yerr = stdList,
            edgecolor='#763626', linewidth = barBorderWidths, color = "#336B87")
     xLbls = [dset.replace("_", " ").strip() for dset in dataSetList]
     xLbls = [lbl + "\n" + mdlName for mdlName, lbl in zip(modelList, xLbls)]
