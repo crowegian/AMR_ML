@@ -116,7 +116,7 @@ def printBestModelStatistics(gridCV, scoring, modelName):
     print(outStr)  
 
 
-def performGridSearch(dataPath, dataPrefix):
+def performGridSearch(dataPath, dataPrefix, n_folds):
     """
     Description: Perfroms gridsearch over 4 sklearn models. Hyperparameters tuned include 
         model parameters as well as feature selection parameters. Feature selection is performed
@@ -126,6 +126,7 @@ def performGridSearch(dataPath, dataPrefix):
         dataPath (str): Path to dataset folder.
         dataPrefix (str) prefix for the dataset in question. All relevant files for this datset
             share the same prefix.
+        n_folds (int): Number of folds to be used in cross validation. eg 5, 10, etc.
     Output:
         modelDict (dict(dict(str))): A dictionary of grid search information for all models. The 
         inner keys are string names for the models, and the values correspond to dictionaries of
@@ -147,7 +148,7 @@ def performGridSearch(dataPath, dataPrefix):
     selectFromThreholds = ["mean*0.25", "mean", "mean*1.25"]
     # selectFromThreholds = ["mean", 0.25, 1e-5]
     if len(relevantFiles) == 2:# no testing data provided so use CV
-        cv = 10
+        cv = n_folds
         trainPath = dataPath + dataPrefix + "full.csv"
         print("reading in data")
         isolateList = []
@@ -378,7 +379,7 @@ def performGridSearch(dataPath, dataPrefix):
     # In order to test the code reduce the number of models iterated over
     testing = False
     if testing:
-        print("testing and reducing the number of models to search")
+        print("TESTING MODE IS ON. reducing the number of models to search")
         for model, modelGridDict in modelDict.items():
 
             for key, elem in modelGridDict["params"][0].items():
