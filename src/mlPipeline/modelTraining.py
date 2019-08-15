@@ -147,7 +147,7 @@ def performGridSearch(dataPath, dataPrefix):
     selectFromThreholds = ["mean*0.25", "mean", "mean*1.25"]
     # selectFromThreholds = ["mean", 0.25, 1e-5]
     if len(relevantFiles) == 2:# no testing data provided so use CV
-        cv = 5
+        cv = 10
         trainPath = dataPath + dataPrefix + "full.csv"
         print("reading in data")
         isolateList = []
