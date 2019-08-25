@@ -326,7 +326,8 @@ def performGridSearch(dataPath, dataPrefix, n_folds):
     # Create pipeline for SVC
     estimators_SVC = []
     estimators_SVC.append(('feature_union', feature_union))
-    estimators_SVC.append(('SVC', SVC()))
+    estimators_SVC.append(('SVC', SVC(probability=True)))# TODO: svc needs probability=True to be able to output
+    # scores in the future
     # estimators.append(models)
     paramGrid_SVC = [
         {
