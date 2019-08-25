@@ -116,7 +116,7 @@ def printBestModelStatistics(gridCV, scoring, modelName):
     print(outStr)  
 
 
-def performGridSearch(dataPath, dataPrefix, n_folds):
+def performGridSearch(dataPath, dataPrefix, n_folds, n_jobs):
     """
     Description: Perfroms gridsearch over 4 sklearn models. Hyperparameters tuned include 
         model parameters as well as feature selection parameters. Feature selection is performed
@@ -127,6 +127,7 @@ def performGridSearch(dataPath, dataPrefix, n_folds):
         dataPrefix (str) prefix for the dataset in question. All relevant files for this datset
             share the same prefix.
         n_folds (int): Number of folds to be used in cross validation. eg 5, 10, etc.
+        n_jobs (int): Number of cores to use whiler peforming grid search
     Output:
         modelDict (dict(dict(str))): A dictionary of grid search information for all models. The 
         inner keys are string names for the models, and the values correspond to dictionaries of
@@ -251,7 +252,6 @@ def performGridSearch(dataPath, dataPrefix, n_folds):
 
     # Specify the models
     modelDict = {}
-    n_jobs = 5
     myVerbose = 1
     # TODO when you perform CV with this stuff consider doing memory option stuff
     scoring = ["accuracy", "f1", "precision", "recall", "roc_auc", "balanced_accuracy"]
