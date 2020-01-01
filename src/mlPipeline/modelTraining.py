@@ -116,7 +116,7 @@ def printBestModelStatistics(gridCV, scoring, modelName):
     print(outStr)  
 
 
-def performGridSearch(dataPath, dataPrefix, n_folds, n_jobs):
+def performGridSearch(dataPath, dataPrefix, n_folds, n_jobs, testing = False):
     """
     Description: Perfroms gridsearch over 4 sklearn models. Hyperparameters tuned include 
         model parameters as well as feature selection parameters. Feature selection is performed
@@ -128,6 +128,8 @@ def performGridSearch(dataPath, dataPrefix, n_folds, n_jobs):
             share the same prefix.
         n_folds (int): Number of folds to be used in cross validation. eg 5, 10, etc.
         n_jobs (int): Number of cores to use whiler peforming grid search
+        testing (bool): If true, then a smaller gridsearch is performed. This is because the
+            full run can take hours, so for debugging purposes this mode exists.
     Output:
         modelDict (dict(dict(str))): A dictionary of grid search information for all models. The 
         inner keys are string names for the models, and the values correspond to dictionaries of
@@ -139,7 +141,7 @@ def performGridSearch(dataPath, dataPrefix, n_folds, n_jobs):
     # Read in the data
     nModels = 4
     relevantFiles = glob.glob(dataPath + dataPrefix + "*.csv")
-    # print(relevantFiles)
+    print(relevantFiles)
     assertStr = "Unexpected item in bagging area. Have you unzipped the data file? Please refer to the README for information on running the ML notebook"
     assert len(relevantFiles) in [2,4], assertStr
 
@@ -378,7 +380,7 @@ def performGridSearch(dataPath, dataPrefix, n_folds, n_jobs):
 
 
     # In order to test the code reduce the number of models iterated over
-    testing = False
+    # testing = False
     if testing:
         print("TESTING MODE IS ON. reducing the number of models to search")
         for model, modelGridDict in modelDict.items():
