@@ -5,7 +5,7 @@ from collections import defaultdict
 import csv
 import os
 import sys
-
+import argparse
 
 def extract_feature_importance(modelName, allDataModelDict, dataSetOfInterest, dataPath,
 		out_path):
@@ -17,7 +17,7 @@ def extract_feature_importance(modelName, allDataModelDict, dataSetOfInterest, d
 	Input:
 		modelName (str): String name for the model to access in allDataModelDict
 		allDataModelDict (dict): A dict created by run_model_grid_search
-		dataSetOfInterest (str): prefic for the dataset used. 
+		dataSetOfInterest (str): prefix for the dataset used. Should match up with dataPath
 		dataPath (str): Path to the folder containing all datasets
 		out_path (str): Where to write csv file of feature importance.
 	Output:
@@ -137,12 +137,14 @@ def extract_feature_importance(modelName, allDataModelDict, dataSetOfInterest, d
 
 
 
-def main():
-	modelDictPath = "data/featureImportanceTestData/modelDictMultiDataRun_datasets_1_2_3_7_20190722.pkl"
+def main(modelDictPath, dataSetOfInterest, dataPath):
 	with open(modelDictPath, "rb") as pklFile:
 		allDataModelDict = pickle.load(pklFile)
-	dataSetOfInterest = "dataset_1_"
-	dataPath = "data/featureImportanceTestData/dataset_1_full.csv"
+
+	assert dataSetOfInterest in dataPath, "Does the prefix {} match the path {}?".\
+		format(dataSetOfInterest, dataPath)
+
+
 	feat_importance_save_prefix = os.path.dirname(modelDictPath)
 	for model_name in ["randomForest", "GBTC", "logistic", "SVC"]:
 		feat_importance_csv_path = os.path.join(feat_importance_save_prefix,
@@ -151,4 +153,19 @@ def main():
 			dataSetOfInterest = dataSetOfInterest, dataPath = dataPath,
 			out_path = feat_importance_csv_path)	
 if __name__ == '__main__':
-	main()
+	# Script can be run by
+	# python extract_feature_importance.py -pr dataset_1_ \
+	# -mp data/featureImportanceTestData/modelDictMultiDataRun_datasets_1_2_3_7_20190722.pkl \
+	# -dp data/featureImportanceTestData/dataset_1_full.csv
+
+	parser = argparse.ArgumentParser(description="Creates a CSV file of important model features")
+	parser.add_argument('--data_prefix', "-pr", type = str,
+	                    help = "The prefix for the data to be used with the model dict.")
+	parser.add_argument('--model_path', "-mp", type = str,
+	                    help = "Where to load the model dictionary from.")
+	parser.add_argument('--data_path', "-dp", type = str,
+	                    help = "What folder to write the csv results to.")
+	args = parser.parse_args()
+
+	main(modelDictPath = args.model_path,
+		dataSetOfInterest = args.data_prefix, dataPath = args.data_path)

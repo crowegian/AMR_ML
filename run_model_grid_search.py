@@ -9,6 +9,7 @@ import copy
 import pprint
 import glob
 pp = pprint.PrettyPrinter(indent=4)
+import argparse
 
 
 def search_for_best_model(dataPath, n_folds, n_jobs, modelDictPicklePath, testing):
@@ -37,16 +38,17 @@ def search_for_best_model(dataPath, n_folds, n_jobs, modelDictPicklePath, testin
 	    dataPrefix = "dataset_{}_".format(i)
 	    print("Running model search on data {}".format(dataPrefix))
 	    allDataModelDict[dataPrefix] = performGridSearch(dataPath = dataPath, dataPrefix = dataPrefix,
-	                                                     n_folds = n_folds, n_jobs = n_jobs)
+	                                                     n_folds = n_folds, n_jobs = n_jobs,
+	                                                     testing = testing)
 	    print("\n\n\n\n\n")
 
 	# Save performance results.
-	modelDictPicklePath = "data/modelDictMultiDataRun.pkl"
+	# modelDictPicklePath = "data/modelDictMultiDataRun.pkl"
 	with open(modelDictPicklePath, "wb") as pklFile:
 	    pickle.dump(allDataModelDict, pklFile)
 	return(allDataModelDict)
-def main():
-	dataPath = "data/MLData/pbr_ml_project_datasets_20180423/"
+def main(dataPath, testing):
+	# dataPath = "data/MLData/pbr_ml_project_datasets_20180423/"
 	# dataPath = "data/MLData/largeData/"
 	modelDictPicklePath = "data/modelDictMultiDataRun_tempDelete.pkl"
 	n_folds = 10
@@ -60,9 +62,21 @@ def main():
 	else:
 		allDataModelDict = search_for_best_model(dataPath = dataPath, n_folds = n_folds,
 			n_jobs = n_jobs, modelDictPicklePath = modelDictPicklePath, testing = testing)
-	print('Entered main')
 
 
 
 if __name__ == '__main__':
-	main()
+	# script can be run with
+	# python run_model_grid_search.py -dp data/MLData/pbr_ml_project_datasets_20180423/ \
+	# -mp data/modelDictMultiDataRun_tempDelete.pkl
+	parser = argparse.ArgumentParser(description="Runs model grid search over multiple"\
+		" models and datasets")
+	parser.add_argument('--data_path', "-dp", type = str,
+	                    help = "Folder containing all the data to perform gridsearch over")
+	parser.add_argument('--model_pickle', "-mp", type = str,
+	                    help = "Where to pickle the grid search dict to")
+	parser.add_argument("--testing", action='store_true',
+		help = "If added then the code will be run in test mode")
+	args = parser.parse_args()
+
+	main(dataPath = args.data_path, testing = args.testing)

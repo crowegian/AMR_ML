@@ -174,7 +174,7 @@ def plotDatasetModelComparison(allDataModelDict, dataSetComparisonList,
             is actually terrible.
         removeZeroScores (boolean): Models with zero scores for the given compMetric are removed.
     Output:
-        datasetBestModelDict (dicr): See findBestModelPerDataset for ditionary information.
+        datasetBestModelDict (dicr): See findBestModelPerDataset for dictionary information.
     TODO:
     """
     datasetBestModelDict = findBestModelPerDataset(allDataModelDict, dataSetComparisonList,
