@@ -53,7 +53,6 @@ def main(dataPath, testing):
 	modelDictPicklePath = "data/modelDictMultiDataRun_tempDelete.pkl"
 	n_folds = 10
 	n_jobs = 2
-	testing = True
 	if os.path.isfile(modelDictPicklePath):
 		print("Found previous gridsearch run. Not running so we don't overwrite {}.".format(
 				modelDictPicklePath))

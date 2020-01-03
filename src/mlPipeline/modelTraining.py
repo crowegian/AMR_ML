@@ -380,7 +380,6 @@ def performGridSearch(dataPath, dataPrefix, n_folds, n_jobs, testing = False):
 
 
     # In order to test the code reduce the number of models iterated over
-    # testing = False
     if testing:
         print("TESTING MODE IS ON. reducing the number of models to search")
         for model, modelGridDict in modelDict.items():
