@@ -54,14 +54,13 @@ def main(dataPath, testing):
 	n_folds = 10
 	n_jobs = 2
 	if os.path.isfile(modelDictPicklePath):
-		print("Found previous gridsearch run. Not running so we don't overwrite {}.".format(
-				modelDictPicklePath))
-		with open(modelDictPicklePath, "rb") as pklFile:
-			allDataModelDict = pickle.load(pklFile)
+		print("Found previous gridsearch run. Not running so we don't overwrite the file {}."\
+			.format(modelDictPicklePath))
 	else:
 		allDataModelDict = search_for_best_model(dataPath = dataPath, n_folds = n_folds,
 			n_jobs = n_jobs, modelDictPicklePath = modelDictPicklePath, testing = testing)
-
+		with open(modelDictPicklePath, "wb") as pklFile:
+			pickle.dump(allDataModelDict, pklFile)
 
 
 if __name__ == '__main__':
