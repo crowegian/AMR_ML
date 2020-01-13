@@ -47,12 +47,10 @@ def search_for_best_model(dataPath, n_folds, n_jobs, modelDictPicklePath, testin
 	with open(modelDictPicklePath, "wb") as pklFile:
 	    pickle.dump(allDataModelDict, pklFile)
 	return(allDataModelDict)
-def main(dataPath, testing):
+def main(dataPath, n_jobs, n_folds, testing):
 	# dataPath = "data/MLData/pbr_ml_project_datasets_20180423/"
 	# dataPath = "data/MLData/largeData/"
 	modelDictPicklePath = "data/modelDictMultiDataRun_tempDelete.pkl"
-	n_folds = 10
-	n_jobs = 2
 	if os.path.isfile(modelDictPicklePath):
 		print("Found previous gridsearch run. Not running so we don't overwrite the file {}."\
 			.format(modelDictPicklePath))
@@ -66,15 +64,19 @@ def main(dataPath, testing):
 if __name__ == '__main__':
 	# script can be run with
 	# python run_model_grid_search.py -dp data/MLData/pbr_ml_project_datasets_20180423/ \
-	# -mp data/modelDictMultiDataRun_tempDelete.pkl
+	# -mp data/modelDictMultiDataRun_tempDelete.pkl -nj 2 -nf 10
 	parser = argparse.ArgumentParser(description="Runs model grid search over multiple"\
 		" models and datasets")
 	parser.add_argument('--data_path', "-dp", type = str,
 	                    help = "Folder containing all the data to perform gridsearch over")
 	parser.add_argument('--model_pickle', "-mp", type = str,
 	                    help = "Where to pickle the grid search dict to")
+	parser.add_argument("--n_jobs", "-nj", type = int,
+						help = "The number of cores to use")
+	parser.add_argument("--n_folds", "-nf",  type = int,
+						help = "The number of folds to perform for cv")
 	parser.add_argument("--testing", action='store_true',
 		help = "If added then the code will be run in test mode")
 	args = parser.parse_args()
 
-	main(dataPath = args.data_path, testing = args.testing)
+	main(dataPath = args.data_path, n_jobs = args.n_jobs, n_folds = args.n_folds, testing = args.testing)
