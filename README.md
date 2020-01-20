@@ -2,7 +2,7 @@
 
 There are two main components to the pipeline for predicting antimicrobial resitance (AMR) using machine learning. The first step is to convert raw genetic data into predictive features using GWAS analysis and mutation annotation software. This code can be found in `src/featureEngineering` along with a README.md file which explains how to use the code. The second step in the pipeline is to perform feature selection, model training, and model evaluation in order to select the best model.The code for this step can be found in `src/mlPipeline/modelTraining.py`. To run the different scripts please see the last section.
 
-# Files Needed to Run the Machine Learning Notebook
+# A Quick Explanation of Files Used
 
 1. There are four main scripts to run. `run_model_grid_search.py` runs the grid search over multiple datasets and model configurations and saves a pickle object of grid search CV object. `extract_performance_metrics.py` Saves a csv file with the best model's performance on each dataset. `extract_feature_importance.py` extracts feature importance of the best model configuration for multiple models on a given dataset. Finally, `run_gwas_bootstrap.py` bootstraps a gwas dataset in order to estimate confidence intervals for performance.
 2. `src/mlPipeline/modelTraining.py`: all functions needed to perform girdsearch CV, feature selection, and evaluation of the models.
@@ -11,7 +11,7 @@ There are two main components to the pipeline for predicting antimicrobial resit
 
 
 # Libraries and Modules needed to run the project
-All cope is implemented in python and R, and requies the use of jupternotebooks. The machine learning pipeline requires numpy, pandas, and sk-learn in order to run correctly. The feature engineering pipeline requires the libraries tidyverse, reshape2, devtools, treeWAS, and caret. Installation for treeWAS is a bit special but code ahs been provided to download and install the git repository. Please see the README.md file in  `src/featureEngineering` for a detailed explanation of the files for that part of the pipeline.
+All code is implemented in python and R. The machine learning pipeline requires numpy, pandas, and sk-learn in order to run correctly. The feature engineering pipeline requires the libraries tidyverse, reshape2, devtools, treeWAS, and caret. Installation for treeWAS is a bit special but code ahs been provided to download and install the git repository. Please see the README.md file in  `src/featureEngineering` for a detailed explanation of the files for that part of the pipeline.
 
 
 # Running the pipeline
