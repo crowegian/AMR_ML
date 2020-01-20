@@ -3,6 +3,8 @@
 There are two main components to the pipeline for predicting polymyxin resistance using machine learning. The first step is to convert raw genetic data into predictive features. We have done this using a reference-based approach that relies on variant calling and IS, as well as a reference-free approach that relies on k-mer detection. For details on the reference-based approach, please see Macesic et al. *Clin Infect Dis* 2019 Sep 12. (PMID 31513705). For the k-mer detection in the reference-free approach, we used the [DSK k-mer counter](https://github.com/GATB/dsk) set at n=31. Sample datasets that we used as inputs in the manuscript can be found in `data`, as well as a file describing the datasets `data/pbr_ml_final_datasets.xlsx`.
 
 
+# A Quick Explanation of Files Used
+
 
 # Input datasets
 All input datasets are CSV files with particular layouts. Please see the included sample datasets in `data` to understand the layout.
@@ -32,6 +34,9 @@ To run the pipeline using GWAS filtering, four files are needed:
 -idx: names/numbers of datasets to be tested. Needs to be entered in the following format: '1 2 3' (would test for dataset_1, dataset_2, dataset_3)
 
 2. `extract_performance_metrics.py`: This script will use a .pkl file with the models as an input and output CSVs of the performance metrics.
+
+# Libraries and Modules needed to run the project
+All code is implemented in python and R. The machine learning pipeline requires numpy, pandas, and sk-learn in order to run correctly. The feature engineering pipeline requires the libraries tidyverse, reshape2, devtools, treeWAS, and caret. Installation for treeWAS is a bit special but code ahs been provided to download and install the git repository. Please see the README.md file in  `src/featureEngineering` for a detailed explanation of the files for that part of the pipeline.
 
 3. `extract_feature_importance.py`: This script will use a .pkl file with the models as an input and output CSVs with metrics for feature importance for models using Logistic Regression, Random Forests and Gradient Boosted Trees Classifier.
 
