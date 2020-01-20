@@ -67,10 +67,6 @@ if __name__ == '__main__':
 	# Script can be run like this.
 	# python extract_performance_metrics.py -cm f1 -mp data/modelDictMultiDataRun.pkl \
 	# -op data/model_performance/
-	# compMetric = "f1"
-	# out_path = "data/model_performance/"
-	# model_path = "data/modelDictMultiDataRun.pkl"
-
 
 	parser = argparse.ArgumentParser(description = "Creates a CSV file of model metrics")
 	parser.add_argument('--compMetric', "-cm", type = str,
