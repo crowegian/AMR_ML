@@ -66,7 +66,7 @@ def main(dataPath, n_jobs, n_folds, modelDictPicklePath, testing, datasets):
 if __name__ == '__main__':
 	# script can be run with
 	# python run_model_grid_search.py -dp data/MLData/pbr_ml_project_datasets_20180423/ \
-	# -mp data/modelDictMultiDataRun_tempDelete_if_this_doest_work_boooooyyyy.pkl -nj 2 -nf 10 -idx 1 2 10 --testing
+	# -mp data/modelDictMultiDataRun.pkl -nj 2 -nf 10 -idx 1 2 10 --testing
 	parser = argparse.ArgumentParser(description="Runs model grid search over multiple"\
 		" models and datasets")
 	parser.add_argument('--data_path', "-dp", type = str,
