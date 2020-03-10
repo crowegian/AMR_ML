@@ -2,6 +2,13 @@
 
 There are two main components to the pipeline for predicting polymyxin resistance using machine learning. The first step is to convert raw genetic data into predictive features. We have done this using a reference-based approach that relies on variant calling and insertion sequence detection, as well as a reference-free approach that relies on k-mer detection. For details on the reference-based approach (including tools used), please see Macesic et al. *Clin Infect Dis* 2019 Sep 12. (PMID 31513705). For the k-mer detection in the reference-free approach, we used the [DSK k-mer counter](https://github.com/GATB/dsk) set at n=31. Sample datasets that we used as inputs in the manuscript can be found in `data/MLData/kmer_datasets.tar.gz` and `data/MLData/non_kmer_datasets.tar.gz`, as well as a file describing the datasets `data/MLData/pbr_ml_final_datasets.xlsx`.
 
+# Installation
+
+1. Clone GitHub repository
+2. Install [Miniconda](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html)
+3. Set up an [environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) using the `environment.yml` file
+
+
 # A Quick Explanation of Files Used
 
 
