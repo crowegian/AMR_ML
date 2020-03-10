@@ -57,4 +57,3 @@ dependencies:
   - wheel
   - xz
   - zlib
-prefix: /home/nmacesic/vk56/software/conda_envs/AMR_ML
