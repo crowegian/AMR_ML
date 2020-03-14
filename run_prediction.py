@@ -73,6 +73,7 @@ if __name__ == '__main__':
 						default = None,
 						help = "Prefix for the model dictionary.")
 	parser.add_argument("--model_name", "-mn",  type = str,
+						default = None,
 						help = "Model name to be used to index into dictionry")
 	parser.add_argument("--out_path", "-op", type = str,
 						help = "Path to save predictions to")
