@@ -39,6 +39,15 @@ Explanation for arguments can be found within the script, but -dp is the path to
 `python run_model_grid_search.py -dp data/MLData/pbr_ml_project_datasets_20180423/ \
 -mp data/modelDictMultiDataRun.pkl -nj 2 -nf 10 -idx 1 2 10 --testing`
 
+## Running prediction 
+The prediction script expects a pickled grid search dictionary with models, or a pickled sklearn model. If the former, then the dataset prefix and model prefix must be supplied, otherwise they can be ignored. -dp is the path to the data to make predictions on, and if labels are available metrics are supplied. Please refer to data format in our data files, as this can be specific to a model. Errors will occur if the model expects different number of columns than the data, and will run but not provide good results if the data has different ordering of columns.
+
+`	python run_prediction.py -dp data/oli_gwas_cross_validation/dataset_17_test.csv \
+	 -mp data/oli_gwas_cross_validation/modelDictMultiDataRun_dataset_17_18_20190826.pkl \
+	 -pr dataset_17_ \
+	 -mn SVC \
+	 -op ./predictions.csv`
+
 ## Extracting performance metrics
 Explanations for arguments can be found within the script, but -cm is the metric to be used to compare models, -mp is the pickle file where the model dict is saved, -op is the out path where performance metrics will be written. -cm is necessary as models have information for multiple metrics and different model configurations can perform differently depending on the metric.
 `python extract_performance_metrics.py -cm f1 -mp data/modelDictMultiDataRun.pkl \
