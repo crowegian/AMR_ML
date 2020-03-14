@@ -46,8 +46,23 @@ def main():
 		"modelDictMultiDataRun_dataset_19_20_21_20190826.pkl"
 	with open(model_pkl_path_19_20_21, "rb") as pklFile:
 		model_dict_19_20_21 = pickle.load(pklFile)
+
+
+
+	model_pkl_path_25 = "data/bootstrap_datasets_25_26/modelDictMultiDataRun_dataset_25.pkl"
+	with open(model_pkl_path_25, "rb") as pklFile:
+		model_dict_25 = pickle.load(pklFile)
+
+	model_pkl_path_26 = "data/bootstrap_datasets_25_26/modelDictMultiDataRun_dataset_26.pkl"
+	with open(model_pkl_path_26, "rb") as pklFile:
+		model_dict_26 = pickle.load(pklFile)
+
+
+
 	dataset_prefix_list_1 = ['dataset_17_', 'dataset_18_']
 	dataset_prefix_list_2 = ['dataset_19_', 'dataset_20_', 'dataset_21_']
+
+	dataset_prefix_list_3 = ['dataset_25_', 'dataset_26_']
 
 
 
@@ -59,14 +74,26 @@ def main():
 			if dataset_prefix in dataset_prefix_list_1:
 				model_dict_all = model_dict_17_18
 				model_dict_id = "17-18"
-			else:
+			elif dataset_prefix in dataset_prefix_list_2:
 				model_dict_all = model_dict_19_20_21
 				model_dict_id = "19-20-21"
+			elif dataset_prefix == "dataset_25_":
+				model_dict_all = model_dict_25
+				model_dict_id = "25"
+			elif dataset_prefix == "dataset_26_":
+				model_dict_all = model_dict_26
+				model_dict_id = "26"
+			else:
+				assert False, "invalid dataset prefix"
 			print("running dataset: {}, with model_dict for datasets: {}".format(dataset_prefix, model_dict_id))
 			for model_name, model_dict in model_dict_all[dataset_prefix].items():
 				best_model = copy.deepcopy(model_dict["gridcv"].best_estimator_)
 				for data_idx in range(0,10):
-					data_path = "data/oli_gwas_cross_validation/" + \
+					if model_dict_id in ["25", "26"]:
+						data_path = "data/bootstrap_datasets_25_26/"
+					else:
+						data_path = "data/bootstrap_datasets_25_26/"	
+					data_path = data_path + \
 						dataset_prefix[:-1] + ".{}".format(data_idx)
 					# Read in all data
 					trainDF, valDF, gwasDF = read_in_data(data_path)
