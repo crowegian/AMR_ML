@@ -16,8 +16,7 @@ def search_for_best_model(dataPath, n_folds, n_jobs, modelDictPicklePath, datase
 	"""
 	Description: Calls the performGridSearch function and fills the allDataModelDict object
 		with model runs and performance metrics for multiple datasets. A new grid search is 
-		performed for each new dataset. This code can take hours to run through all 14 datasets
-		and should be run over night.
+		performed for each new dataset. This code can take hours to run.
 	Input: 
 		dataPath (str): The path to the folder where data is held using standard prefixes
 		n_folds (int): The number of folds to do for CV when able to do so.
