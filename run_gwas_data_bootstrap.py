@@ -74,9 +74,11 @@ def main():
 			if dataset_prefix in dataset_prefix_list_1:
 				model_dict_all = model_dict_17_18
 				model_dict_id = "17-18"
+				continue
 			elif dataset_prefix in dataset_prefix_list_2:
 				model_dict_all = model_dict_19_20_21
 				model_dict_id = "19-20-21"
+				continue
 			elif dataset_prefix == "dataset_25_":
 				model_dict_all = model_dict_25
 				model_dict_id = "25"
