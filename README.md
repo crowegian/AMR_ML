@@ -18,7 +18,7 @@ All input datasets are CSV files with particular layouts. Please see the include
 ## Datasets without GWAS filtering
 To run the pipeline without using GWAS filtering, two files are needed:
 - Metadata file with naming format of `dataset_xx_metadata.csv`. This includes the isolate name, polymyxin susceptibility as a binary variable and the dataset that the isolate came from.
-- Feature file with naming format of `dataset_xx_full.csv`. This is a a file where isolates are rows and features (either variants or k-mers) are columns. It should be a one-hot matrix.
+- Feature file with naming format of `dataset_xx_full.csv`. This is a file where isolates are rows and features (either variants or k-mers) are columns. It should be a one-hot matrix.
 
 ## Datasets with GWAS filtering
 To run the pipeline using GWAS filtering, four files are needed:
